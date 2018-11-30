@@ -5,6 +5,7 @@ metadata:
   labels:
     app: customer    
 spec:
+  type: LoadBalancer
   ports:
   - name: http
     port: 8080
