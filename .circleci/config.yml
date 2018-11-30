@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Build and push image
-          run: |
+          command: |
             mvn clean package
             docker build . -t marcosx/customer:v1
             docker login -u $DOCKER_USER -p $DOCKER_PWD
@@ -19,7 +19,7 @@ jobs:
       - checkout
       - run:
           name: Deploy to cluster
-          run: |
+          command: |
             echo ${GCLOUD_SERVICE_KEY} > gcloud-key.json
             gcloud auth activate-service-account --key-file=gcloud-key.json
             gcloud container clusters get-credentials "dev-playground" --project "g-gke-clusters" --zone "us-central1-a"
