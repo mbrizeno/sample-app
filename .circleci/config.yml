@@ -63,7 +63,7 @@ jobs:
       - run:
           name: Build and push image
           command: |
-            cd recommendation/java/springboot
+            cd recommendation/java/vertx
             mvn clean package
             docker build . -t marcosx/recommendation:v1
             docker login -u $DOCKER_USER -p $DOCKER_PWD
