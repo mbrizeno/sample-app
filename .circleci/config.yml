@@ -27,11 +27,73 @@ jobs:
             gcloud container clusters get-credentials "dev-playground" --project "g-gke-clusters" --zone "us-central1-a"
             kubectl apply -f customer/kubernetes/Deployment.yml -n sample-app
             kubectl apply -f customer/kubernetes/Service.yml -n sample-app
+  build_preference:
+    docker:
+      - image: circleci/openjdk
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and push image
+          command: |
+            cd preference/java/springboot
+            mvn clean package
+            docker build . -t marcosx/preference:v1
+            docker login -u $DOCKER_USER -p $DOCKER_PWD
+            docker push marcosx/preference:v1
+  deploy_preference:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Deploy to cluster
+          command: |
+            echo ${GCLOUD_SERVICE_KEY} > gcloud-key.json
+            gcloud auth activate-service-account --key-file=gcloud-key.json
+            gcloud container clusters get-credentials "dev-playground" --project "g-gke-clusters" --zone "us-central1-a"
+            kubectl apply -f preference/kubernetes/Deployment.yml -n sample-app
+            kubectl apply -f preference/kubernetes/Service.yml -n sample-app
+  build_recommendation:
+    docker:
+      - image: circleci/openjdk
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and push image
+          command: |
+            cd recommendation/java/springboot
+            mvn clean package
+            docker build . -t marcosx/recommendation:v1
+            docker login -u $DOCKER_USER -p $DOCKER_PWD
+            docker push marcosx/recommendation:v1
+  deploy_recommendation:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Deploy to cluster
+          command: |
+            echo ${GCLOUD_SERVICE_KEY} > gcloud-key.json
+            gcloud auth activate-service-account --key-file=gcloud-key.json
+            gcloud container clusters get-credentials "dev-playground" --project "g-gke-clusters" --zone "us-central1-a"
+            kubectl apply -f recommendation/kubernetes/Deployment.yml -n sample-app
+            kubectl apply -f recommendation/kubernetes/Service.yml -n sample-app
 workflows:
   version: 2
-  customer:
+  sample_app:
     jobs:
       - build_customer
       - deploy_customer:
           requires:
             - build_customer
+      - build_preference
+      - deploy_preference:
+          requires:
+            - build_preference
+      - build_recommendation
+      - deploy_recommendation:
+          requires:
+            - build_recommendation
