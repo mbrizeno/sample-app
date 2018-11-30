@@ -18,11 +18,13 @@ jobs:
     steps:
       - checkout
       - run:
-        echo ${GCLOUD_SERVICE_KEY} > gcloud-key.json
-        gcloud auth activate-service-account --key-file=gcloud-key.json
-        gcloud container clusters get-credentials "dev-playground" --project "g-gke-clusters" --zone "us-central1-a"
-        kubectl apply -f customer/kubernetes/Deployment.yml
-        kubectl apply -f customer/kubernetes/Service.yml
+          name: Deploy to cluster
+          run: |
+            echo ${GCLOUD_SERVICE_KEY} > gcloud-key.json
+            gcloud auth activate-service-account --key-file=gcloud-key.json
+            gcloud container clusters get-credentials "dev-playground" --project "g-gke-clusters" --zone "us-central1-a"
+            kubectl apply -f customer/kubernetes/Deployment.yml -n sample-app
+            kubectl apply -f customer/kubernetes/Service.yml -n sample-app
 workflows:
   version: 2
   customer:
