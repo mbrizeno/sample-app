@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build_customer:
+    docker:
+      - circleci/openjdk
+    steps:
+      - checkout
+      - run:
+          name: Build and push image
+          run: |
+            mvn clean package
+            docker build . -t marcosx/customer:v1
+            docker login -u $DOCKER_USER -p $DOCKER_PWD
+            docker push marcosx/customer:v1
+  deploy_customer:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+        echo ${GCLOUD_SERVICE_KEY} > gcloud-key.json
+        gcloud auth activate-service-account --key-file=gcloud-key.json
+        gcloud container clusters get-credentials "dev-playground" --project "g-gke-clusters" --zone "us-central1-a"
+        kubectl apply -f customer/kubernetes/Deployment.yml
+        kubectl apply -f customer/kubernetes/Service.yml
+workflows:
+  version: 2
+  customer:
+    jobs:
+      - build_customer
+      - deploy_customer:
+        requires:
+          - build_customer
