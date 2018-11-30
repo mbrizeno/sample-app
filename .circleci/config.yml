@@ -31,5 +31,5 @@ workflows:
     jobs:
       - build_customer
       - deploy_customer:
-        requires:
-          - build_customer
+          requires:
+            - build_customer
