@@ -8,6 +8,7 @@ jobs:
       - run:
           name: Build and push image
           command: |
+            cd customer/java/springboot
             mvn clean package
             docker build . -t marcosx/customer:v1
             docker login -u $DOCKER_USER -p $DOCKER_PWD
