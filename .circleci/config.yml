@@ -5,6 +5,7 @@ jobs:
       - image: circleci/openjdk
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Build and push image
           command: |
